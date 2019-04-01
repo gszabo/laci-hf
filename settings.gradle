@@ -1,0 +1,4 @@
+include 'schema-lib-generator-scala'
+include 'schema-lib-generator-java'
+include 'directory-test-app'
+

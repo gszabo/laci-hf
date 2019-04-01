@@ -1,0 +1,5 @@
+schema-lib-generator-scala/build
+.idea
+directory-test-app/build
+.gradle
+schema-lib-generator-java/build

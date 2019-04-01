@@ -1,0 +1,39 @@
+{
+    "defs": [
+        {
+            "name": "FileSystemObject",
+            "abstract": true,
+            "inherits": [],
+            "fields": [
+                {
+                    "name": "name",
+                    "list": false,
+                    "type": "String"
+                }
+            ]
+        },
+        {
+            "name": "File",
+            "abstract": false,
+            "inherits": [
+                "FileSystemObject"
+            ],
+            "fields": []
+        },
+        {
+            "name": "Directory",
+            "abstract": false,
+            "inherits": [
+                "FileSystemObject"
+            ],
+            "fields": [
+                {
+                    "name": "content",
+                    "list": true,
+                    "type": "FileSystemObject"
+                }
+
+            ]
+        }
+    ]
+}

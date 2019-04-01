@@ -1,0 +1,15 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // TODO: Change this if you are using java
+    // compile project(path: ":schema-lib-generator-java", configuration: "directory-lib")
+    compile project(path: ":schema-lib-generator-scala", configuration: "directory-lib")
+
+    compile "com.google.guava:guava:21.0"
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}

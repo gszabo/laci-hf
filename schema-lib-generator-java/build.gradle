@@ -1,0 +1,91 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.google.guava:guava:21.0"
+    }
+}
+
+import com.google.common.base.CaseFormat
+import com.google.common.io.Files
+
+apply plugin: "maven"
+apply plugin: "java"
+
+group "com.prezi.homeassignment"
+version "0.1"
+
+repositories {
+    mavenCentral()
+    build
+}
+
+configurations {
+    generatedCompile
+}
+
+dependencies {
+    compile "com.google.guava:guava:21.0"
+    compile "com.fasterxml.jackson.core:jackson-annotations:2.8.6"
+    compile "com.fasterxml.jackson.core:jackson-core:2.8.6"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.8.6"
+
+    // TODO: add generated code dependencies here like this:
+    // generatedCompile "org:awesomelib:4.55"
+}
+
+task jarAllGenerated
+
+fileTree("$projectDir/src/main/resources/schemas").each {
+    if (it.getAbsolutePath().endsWith(".json")) {
+        codeGenTask name: Files.getNameWithoutExtension(it.getName()) + "-lib", schema: it.getAbsolutePath()
+    }
+}
+
+def codeGenTask(Map<String, Object> props) {
+    def configurationName = props.name
+    def taskName = CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, props.name)
+    def dirSegment = props.name
+    def providedSrcDir = "${projectDir}/src/provided/java"
+    def outSrcDir = "${projectDir}/build/generated-${dirSegment}-src"
+    def outBuildDir = "${projectDir}/build/${dirSegment}-classes"
+    def outJarDir = "${projectDir}/build/${dirSegment}-jar"
+    def outJarBaseName = "${dirSegment}"
+
+    configurations.create(configurationName).extendsFrom(configurations.generatedCompile)
+
+    def generateSourcesTask = task("generate${taskName}Sources", type: JavaExec) {
+        dependsOn classes
+        inputs.file props.schema
+        outputs.dir outSrcDir
+        main = 'com.prezi.homeassignment.Main'
+        args = [props.schema, outSrcDir]
+        classpath sourceSets.main.runtimeClasspath
+    }
+
+    def compileJavaTask = task("compileJava${taskName}", type: JavaCompile) {
+        dependsOn generateSourcesTask
+        source (providedSrcDir, outSrcDir)
+        classpath = configurations.generatedCompile
+        destinationDir = file(outBuildDir)
+    }
+
+    def jarTask = task("jar${taskName}", type: Jar) {
+        dependsOn compileJavaTask
+        from compileJavaTask.destinationDir
+        baseName = outJarBaseName
+        destinationDir = file(outJarDir)
+    }
+
+    def buildTask = task("build${taskName}") {
+        dependsOn compileJavaTask
+    }
+
+    tasks.build.dependsOn(buildTask)
+    tasks.jarAllGenerated.dependsOn(jarTask)
+
+    artifacts.add(configurationName, file(jarTask.archivePath)) {
+        builtBy jarTask
+    }
+}
