@@ -3,3 +3,4 @@ schema-lib-generator-scala/build
 directory-test-app/build
 .gradle
 schema-lib-generator-java/build
+*.iml
