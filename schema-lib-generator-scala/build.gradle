@@ -29,6 +29,7 @@ dependencies {
     compile "org.scala-lang:scala-library:2.11.8"
     compile "org.scala-lang:scala-compiler:2.11.8"
     compile "io.argonaut:argonaut_2.11:6.1"
+    testCompile 'org.scalatest:scalatest_2.11:3.0.5'
     // TODO: add generated code dependencies here like this:
     // generatedCompile "org:awesomelib:4.55"
 }

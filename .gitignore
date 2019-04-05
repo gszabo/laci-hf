@@ -1,4 +1,5 @@
 schema-lib-generator-scala/build
+schema-lib-generator-scala/out
 .idea
 directory-test-app/build
 .gradle
