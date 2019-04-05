@@ -20,6 +20,20 @@ class GeneratorTest extends FunSpec {
         }
     }
 
-    // todo: reminder to include package name in the generator interface somehow
+    describe("If package name is given") {
+        it("includes the package name in the generated code") {
+            val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true)
+            val g = new Generator(Some("com.package.name"))
+            val result = g.generate(t)
+            assert(result.fileName === "MyEmptyAbstractType.java")
+            assert(result.contents ===
+                """package com.package.name;
+                  #
+                  #public interface MyEmptyAbstractType {
+                  #}
+                  #""".stripMargin('#')
+            )
+        }
+    }
 
 }

@@ -2,16 +2,19 @@ package com.prezi.homeassignment
 
 import com.prezi.homeassignment.schemalang.ComplexSchemaType
 
-class Generator {
+class Generator(val packageName: Option[String] = None) {
 
     def generate(typeDef: ComplexSchemaType): GeneratorResult = {
         GeneratorResult(
             typeDef.name.toString() + ".java",
+            packageDeclaration +
             s"""public interface ${typeDef.name.toString()} {
-              #}
-              #""".stripMargin('#')
+               #}
+               #""".stripMargin('#')
         )
     }
+
+    def packageDeclaration: String = packageName.fold("") (name => s"package $name;\n\n")
 
 }
 
