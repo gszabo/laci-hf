@@ -46,22 +46,21 @@ class GeneratorTest extends FunSpec {
 
     describe("If package name is given") {
         it("includes the package name in the generated code") {
-            val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true)
-            val g = new Generator(Some("com.package.name"))
-            val result = g.generate(t)
-            assert(result.fileName === "MyEmptyAbstractType.java")
-            assert(result.contents ===
+            checkGeneratedSource(
+                ComplexSchemaType("MyEmptyAbstractType", isAbstract = true),
+                packageName = Some("com.package.name")
+            ) {
                 """package com.package.name;
                   #
                   #public interface MyEmptyAbstractType {
                   #}
                   #""".stripMargin('#')
-            )
+            }
         }
     }
 
-    def checkGeneratedSource(t: ComplexSchemaType)(expectedSourceCode: String): Unit = {
-        val g = new Generator()
+    def checkGeneratedSource(t: ComplexSchemaType, packageName: Option[String] = None)(expectedSourceCode: String): Unit = {
+        val g = new Generator(packageName)
         val result = g.generate(t)
         assert(result.fileName === s"${t.name}.java")
         assert(result.contents === expectedSourceCode)
