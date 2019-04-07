@@ -27,15 +27,20 @@ class Generator(val packageName: Option[String] = None) {
     def fields(typeDef: ComplexSchemaType): String = {
         if (typeDef.fields.nonEmpty) {
             val f = typeDef.fields.head
-            s"""
-               |    ${typeNameOfField(f)} get${f.name.toString().capitalize}();
-               |    void set${f.name.toString().capitalize}(${typeNameOfField(f)} value);
-               |
-               |""".stripMargin
+            "\n" + oneFieldSection(f) + "\n"
         } else {
             ""
         }
     }
+
+    def oneFieldSection(f: FieldDef): String = {
+        val indentation = " " * 4
+        List(getter(f), setter(f)).map(indentation + _).mkString("\n") + "\n"
+    }
+
+    def getter(f: FieldDef): String = s"${typeNameOfField(f)} get${f.name.toString().capitalize}();"
+
+    def setter(f: FieldDef): String = s"void set${f.name.toString().capitalize}(${typeNameOfField(f)} value);"
 
     def typeNameOfField(f: FieldDef): String = {
         if (f.isList) {
