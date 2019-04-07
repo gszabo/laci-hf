@@ -79,6 +79,55 @@ class GeneratorTest extends FunSpec {
                       #""".stripMargin('#')
                 }
             }
+
+            it("Multiple fields") {
+                checkGeneratedSource(
+                    ComplexSchemaType(
+                        "MyAbstractType",
+                        isAbstract = true,
+                        fields = List(
+                            FieldDef("field1", isList = false, "Type1"),
+                            FieldDef("field2", isList = true, "Type2")
+                        )
+                    )
+                ) {
+                    """public interface MyAbstractType {
+                      #
+                      #    Type1 getField1();
+                      #    void setField1(Type1 value);
+                      #
+                      #    Type2Vector getField2();
+                      #    void setField2(Type2Vector value);
+                      #
+                      #}
+                      #""".stripMargin('#')
+                }
+            }
+        }
+
+        it("Complete example") {
+            checkGeneratedSource(
+                ComplexSchemaType(
+                    "Foo",
+                    isAbstract = true,
+                    inheritsFrom = List("Base1", "Base2"),
+                    fields = List(
+                        FieldDef("field1", isList = false, "Type1"),
+                        FieldDef("field2", isList = true, "Type2")
+                    )
+                )
+            ) {
+                """public interface Foo extends Base1, Base2 {
+                  #
+                  #    Type1 getField1();
+                  #    void setField1(Type1 value);
+                  #
+                  #    Type2Vector getField2();
+                  #    void setField2(Type2Vector value);
+                  #
+                  #}
+                  #""".stripMargin('#')
+            }
         }
     }
 

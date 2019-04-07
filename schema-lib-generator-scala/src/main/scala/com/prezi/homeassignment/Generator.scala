@@ -26,8 +26,7 @@ class Generator(val packageName: Option[String] = None) {
 
     def fields(typeDef: ComplexSchemaType): String = {
         if (typeDef.fields.nonEmpty) {
-            val f = typeDef.fields.head
-            "\n" + oneFieldSection(f) + "\n"
+            "\n" + typeDef.fields.map(oneFieldSection).mkString("\n") + "\n"
         } else {
             ""
         }
