@@ -13,10 +13,36 @@ class GeneratorTest extends FunSpec {
             val result = g.generate(t)
             assert(result.fileName === "MyEmptyAbstractType.java")
             assert(result.contents ===
-              """public interface MyEmptyAbstractType {
-                #}
-                #""".stripMargin('#')
+                """public interface MyEmptyAbstractType {
+                  #}
+                  #""".stripMargin('#')
             )
+        }
+
+        describe("inheriting") {
+            it("from one parent") {
+                val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true, inheritsFrom = List("Parent"))
+                val g = new Generator()
+                val result = g.generate(t)
+                assert(result.fileName === "MyEmptyAbstractType.java")
+                assert(result.contents ===
+                    """public interface MyEmptyAbstractType extends Parent {
+                      #}
+                      #""".stripMargin('#')
+                )
+            }
+
+            it("from multiple parents") {
+                val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true, inheritsFrom = List("Parent1", "Parent2"))
+                val g = new Generator()
+                val result = g.generate(t)
+                assert(result.fileName === "MyEmptyAbstractType.java")
+                assert(result.contents ===
+                    """public interface MyEmptyAbstractType extends Parent1, Parent2 {
+                      #}
+                      #""".stripMargin('#')
+                )
+            }
         }
     }
 
