@@ -8,40 +8,38 @@ class GeneratorTest extends FunSpec {
 
     describe("Abstract types") {
         it("Empty abstract type generates empty interface") {
-            val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true)
-            val g = new Generator()
-            val result = g.generate(t)
-            assert(result.fileName === "MyEmptyAbstractType.java")
-            assert(result.contents ===
+            checkGeneratedSource(
+                ComplexSchemaType("MyEmptyAbstractType", isAbstract = true)
+            ) {
                 """public interface MyEmptyAbstractType {
                   #}
                   #""".stripMargin('#')
-            )
+            }
         }
 
-        describe("inheriting") {
+        describe("inheriting adds an extends clause to the interface declaration") {
             it("from one parent") {
-                val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true, inheritsFrom = List("Parent"))
-                val g = new Generator()
-                val result = g.generate(t)
-                assert(result.fileName === "MyEmptyAbstractType.java")
-                assert(result.contents ===
+                checkGeneratedSource(
+                    ComplexSchemaType("MyEmptyAbstractType", isAbstract = true, inheritsFrom = List("Parent"))
+                ) {
                     """public interface MyEmptyAbstractType extends Parent {
                       #}
                       #""".stripMargin('#')
-                )
+                }
             }
 
             it("from multiple parents") {
-                val t = ComplexSchemaType("MyEmptyAbstractType", isAbstract = true, inheritsFrom = List("Parent1", "Parent2"))
-                val g = new Generator()
-                val result = g.generate(t)
-                assert(result.fileName === "MyEmptyAbstractType.java")
-                assert(result.contents ===
+                checkGeneratedSource(
+                    ComplexSchemaType(
+                        "MyEmptyAbstractType",
+                        isAbstract = true,
+                        inheritsFrom = List("Parent1", "Parent2")
+                    )
+                ) {
                     """public interface MyEmptyAbstractType extends Parent1, Parent2 {
                       #}
                       #""".stripMargin('#')
-                )
+                }
             }
         }
     }
@@ -60,6 +58,13 @@ class GeneratorTest extends FunSpec {
                   #""".stripMargin('#')
             )
         }
+    }
+
+    def checkGeneratedSource(t: ComplexSchemaType)(expectedSourceCode: String): Unit = {
+        val g = new Generator()
+        val result = g.generate(t)
+        assert(result.fileName === s"${t.name}.java")
+        assert(result.contents === expectedSourceCode)
     }
 
 }
