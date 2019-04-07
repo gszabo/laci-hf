@@ -9,7 +9,7 @@ class Generator(val packageName: Option[String] = None) {
             typeDef.name.toString() + ".java",
             packageDeclaration +
             s"""public interface ${typeDef.name.toString()}${extendsDeclaration(typeDef)} {
-               #}
+               #${fields(typeDef)}}
                #""".stripMargin('#')
         )
     }
@@ -19,6 +19,19 @@ class Generator(val packageName: Option[String] = None) {
     def extendsDeclaration(typeDef: ComplexSchemaType): String = {
         if (typeDef.inheritsFrom.nonEmpty) {
             s" extends ${typeDef.inheritsFrom.mkString(", ")}"
+        } else {
+            ""
+        }
+    }
+
+    def fields(typeDef: ComplexSchemaType): String = {
+        if (typeDef.fields.nonEmpty) {
+            val f = typeDef.fields.head
+            s"""
+               |    ${f.typeName.toString()} get${f.name.toString().capitalize}();
+               |    void set${f.name.toString().capitalize}(${f.typeName.toString()} value);
+               |
+               |""".stripMargin
         } else {
             ""
         }

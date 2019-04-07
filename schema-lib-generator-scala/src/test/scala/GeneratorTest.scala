@@ -42,6 +42,26 @@ class GeneratorTest extends FunSpec {
                 }
             }
         }
+
+        describe("having fields adds getters and setters") {
+            it("One non-list field") {
+                checkGeneratedSource(
+                    ComplexSchemaType(
+                        "MyAbstractType",
+                        isAbstract = true,
+                        fields = List(FieldDef("fieldName", isList = false, "TypeOfField"))
+                    )
+                ) {
+                    """public interface MyAbstractType {
+                      #
+                      #    TypeOfField getFieldName();
+                      #    void setFieldName(TypeOfField value);
+                      #
+                      #}
+                      #""".stripMargin('#')
+                }
+            }
+        }
     }
 
     describe("If package name is given") {
