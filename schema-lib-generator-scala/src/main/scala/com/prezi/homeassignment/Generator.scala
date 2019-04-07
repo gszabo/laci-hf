@@ -1,6 +1,6 @@
 package com.prezi.homeassignment
 
-import com.prezi.homeassignment.schemalang.ComplexSchemaType
+import com.prezi.homeassignment.schemalang.{ComplexSchemaType, FieldDef}
 
 class Generator(val packageName: Option[String] = None) {
 
@@ -28,12 +28,20 @@ class Generator(val packageName: Option[String] = None) {
         if (typeDef.fields.nonEmpty) {
             val f = typeDef.fields.head
             s"""
-               |    ${f.typeName.toString()} get${f.name.toString().capitalize}();
-               |    void set${f.name.toString().capitalize}(${f.typeName.toString()} value);
+               |    ${typeNameOfField(f)} get${f.name.toString().capitalize}();
+               |    void set${f.name.toString().capitalize}(${typeNameOfField(f)} value);
                |
                |""".stripMargin
         } else {
             ""
+        }
+    }
+
+    def typeNameOfField(f: FieldDef): String = {
+        if (f.isList) {
+            s"${f.typeName.toString()}Vector"
+        } else {
+            f.typeName.toString()
         }
     }
 

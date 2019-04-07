@@ -61,6 +61,24 @@ class GeneratorTest extends FunSpec {
                       #""".stripMargin('#')
                 }
             }
+
+            it("One list field") {
+                checkGeneratedSource(
+                    ComplexSchemaType(
+                        "MyAbstractType",
+                        isAbstract = true,
+                        fields = List(FieldDef("fieldName", isList = true, "TypeOfField"))
+                    )
+                ) {
+                    """public interface MyAbstractType {
+                      #
+                      #    TypeOfFieldVector getFieldName();
+                      #    void setFieldName(TypeOfFieldVector value);
+                      #
+                      #}
+                      #""".stripMargin('#')
+                }
+            }
         }
     }
 
