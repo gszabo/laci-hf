@@ -14,6 +14,23 @@ class Generator(val packageName: Option[String] = None) {
         )
     }
 
+    def generateVector(typeName: String): GeneratorResult = {
+        val vectorVariableName = typeName.charAt(0).toLower + typeName.substring(1) + "List"
+        val className = typeName + "Vector"
+        GeneratorResult(
+            className + ".java",
+            packageDeclaration +
+            s"""public class $className extends ArrayListVector<$typeName> {
+               #
+               #    public $className($typeName... $vectorVariableName) {
+               #        super($vectorVariableName);
+               #    }
+               #
+               #}
+               #""".stripMargin('#')
+        )
+    }
+
     def packageDeclaration: String = packageName.fold("") (name => s"package $name;\n\n")
 
     def extendsDeclaration(typeDef: ComplexSchemaType): String = {

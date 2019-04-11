@@ -146,6 +146,27 @@ class GeneratorTest extends FunSpec {
         }
     }
 
+    describe("Generating vectors for list types") {
+        it("relies on the provided implementation") {
+            val g = new Generator(Some("com.package.name"))
+            val typeName = "FooBar"
+            val result = g.generateVector(typeName)
+            assert(result.fileName === s"${typeName}Vector.java")
+            assert(result.contents ===
+                """package com.package.name;
+                  #
+                  #public class FooBarVector extends ArrayListVector<FooBar> {
+                  #
+                  #    public FooBarVector(FooBar... fooBarList) {
+                  #        super(fooBarList);
+                  #    }
+                  #
+                  #}
+                  #""".stripMargin('#')
+            )
+        }
+    }
+
     def checkGeneratedSource(t: ComplexSchemaType, packageName: Option[String] = None)(expectedSourceCode: String): Unit = {
         val g = new Generator(packageName)
         val result = g.generate(t)
