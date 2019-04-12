@@ -9,7 +9,7 @@ object FieldOrder {
             t.fields
         } else {
             val parents = t.inheritsFrom.map(parentName => schema.complexTypes.find(ct => ct.name == parentName).get)
-            parents.flatMap(p => p.fields) ++ t.fields
+            parents.flatMap(parent => naturalOrder(parent, schema)).distinct ++ t.fields
         }
     }
 

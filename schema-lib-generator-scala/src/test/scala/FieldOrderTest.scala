@@ -57,6 +57,71 @@ class FieldOrderTest extends FunSpec {
             val schema = Schema(List(t, parent1Type, parent2Type))
             assert(FieldOrder.naturalOrder(t, schema) === (parent2Fields ++ parent1Fields ++ ownFields))
         }
+
+        it("inheriting fields from multiple levels") {
+            val grandParentFields = List(
+                FieldDef("field1", isList = false, "Type1")
+            )
+            val parentFields = List(
+                FieldDef("field2", isList = false, "Type2")
+            )
+            val grandParentType = ComplexSchemaType("grandParentTypeName", isAbstract = true, fields = grandParentFields)
+            val parentType = ComplexSchemaType(
+                "parentTypeName",
+                isAbstract = true,
+                inheritsFrom = List("grandParentTypeName"),
+                fields = parentFields
+            )
+            val ownFields = List(
+                FieldDef("field3", isList = false, "Type3"),
+                FieldDef("field4", isList = false, "Type4")
+            )
+            val t = ComplexSchemaType(
+                "typeName",
+                inheritsFrom = List("parentTypeName"),
+                fields = ownFields
+            )
+            val schema = Schema(List(t, grandParentType, parentType))
+            assert(FieldOrder.naturalOrder(t, schema) === (grandParentFields ++ parentFields ++ ownFields))
+        }
+
+        it("duplications are removed") {
+            val grandParentFields = List(
+                FieldDef("field1", isList = false, "Type1")
+            )
+            val parent1Fields = List(
+                FieldDef("field2", isList = false, "Type2")
+            )
+            val parent2Fields = List(
+                FieldDef("field3", isList = false, "Type3")
+            )
+            val grandParentType = ComplexSchemaType("grandParentTypeName", isAbstract = true, fields = grandParentFields)
+            val parent1Type = ComplexSchemaType(
+                "parent1TypeName",
+                isAbstract = true,
+                inheritsFrom = List("grandParentTypeName"),
+                fields = parent1Fields
+            )
+            val parent2Type = ComplexSchemaType(
+                "parent2TypeName",
+                isAbstract = true,
+                inheritsFrom = List("grandParentTypeName"),
+                fields = parent2Fields
+            )
+            val ownFields = List(
+                FieldDef("field4", isList = false, "Type4")
+            )
+            val t = ComplexSchemaType(
+                "typeName",
+                inheritsFrom = List("parent1TypeName", "parent2TypeName"),
+                fields = ownFields
+            )
+            val schema = Schema(List(t, grandParentType, parent1Type, parent2Type))
+
+            val resultOrder = FieldOrder.naturalOrder(t, schema)
+
+            assert(resultOrder === (grandParentFields ++ parent1Fields ++ parent2Fields ++ ownFields))
+        }
     }
 
 }
