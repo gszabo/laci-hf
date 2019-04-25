@@ -5,6 +5,29 @@ import com.prezi.homeassignment.schemalang.{ComplexSchemaType, FieldDef}
 class Generator(val packageName: Option[String] = None) {
 
     def generate(typeDef: ComplexSchemaType): GeneratorResult = {
+        if (typeDef.isAbstract) {
+            generateInterface(typeDef)
+        } else {
+            generateClass(typeDef)
+        }
+    }
+
+    private def generateClass(typeDef: ComplexSchemaType) = {
+        GeneratorResult(
+            typeDef.name.toString() + ".java",
+            packageDeclaration +
+            s"""public class ${typeDef.name.toString()} {
+               #
+               #    public ${typeDef.name.toString()}(
+               #    ) {
+               #    }
+               #
+               #}
+               #""".stripMargin('#')
+        )
+    }
+
+    private def generateInterface(typeDef: ComplexSchemaType) = {
         GeneratorResult(
             typeDef.name.toString() + ".java",
             packageDeclaration +

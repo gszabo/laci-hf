@@ -131,6 +131,28 @@ class GeneratorTest extends FunSpec {
         }
     }
 
+    describe("Concrete types") {
+
+        it("empty type") {
+            checkGeneratedSource(
+                ComplexSchemaType(
+                    "Foo",
+                    isAbstract = false
+                )
+            ) {
+                """public class Foo {
+                  #
+                  #    public Foo(
+                  #    ) {
+                  #    }
+                  #
+                  #}
+                  #""".stripMargin('#')
+            }
+        }
+
+    }
+
     describe("If package name is given") {
         it("includes the package name in the generated code") {
             checkGeneratedSource(
