@@ -146,6 +146,16 @@ class GeneratorTest extends FunSpec {
                   #    ) {
                   #    }
                   #
+                  #    public String toJson() {
+                  #        StringBuilder result = new StringBuilder();
+                  #
+                  #        result.append("{\"def\":\"Foo\"");
+                  #
+                  #        result.append("}");
+                  #
+                  #        return result.toString();
+                  #    }
+                  #
                   #}
                   #""".stripMargin('#')
             }

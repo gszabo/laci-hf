@@ -13,13 +13,24 @@ class Generator(val packageName: Option[String] = None) {
     }
 
     private def generateClass(typeDef: ComplexSchemaType) = {
+        val className = typeDef.name.toString()
         GeneratorResult(
             typeDef.name.toString() + ".java",
             packageDeclaration +
-            s"""public class ${typeDef.name.toString()} {
+            s"""public class $className {
                #
-               #    public ${typeDef.name.toString()}(
+               #    public $className(
                #    ) {
+               #    }
+               #
+               #    public String toJson() {
+               #        StringBuilder result = new StringBuilder();
+               #
+               #        result.append("{\\"def\\":\\"$className\\"");
+               #
+               #        result.append("}");
+               #
+               #        return result.toString();
                #    }
                #
                #}
