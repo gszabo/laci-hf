@@ -60,48 +60,15 @@ class Generator(val packageName: Option[String] = None) {
         val interface = Interface(
             name = name,
             _extends = typeDef.inheritsFrom.map(t => t.toString),
-            accessors = typeDef.fields.map(f => AbstractAccessorPair(f.name.toString, typeNameOfField(f)))
+            members = typeDef.fields.map(f => AbstractAccessorPair(f.name.toString, typeNameOfField(f)))
         )
         GeneratorResult(
             name + ".java",
-            packageDeclaration + interface.toString
+            packageDeclaration + interface.lines().mkString("\n")
         )
     }
 
     def packageDeclaration: String = packageName.fold("") (name => PackageDeclaration(name).toString)
-
-    def extendsDeclaration(typeDef: ComplexSchemaType): String = {
-        if (typeDef.inheritsFrom.nonEmpty) {
-            s" extends ${typeDef.inheritsFrom.mkString(", ")}"
-        } else {
-            ""
-        }
-    }
-
-    def fields(typeDef: ComplexSchemaType): String = {
-        clearIfOnlyWhitespace(
-            "\n" +
-            indent(
-                typeDef.fields
-                .map(f => AbstractAccessorPair(f.name.toString, typeNameOfField(f)))
-                .mkString("\n\n")
-            ) +
-            "\n\n"
-        )
-    }
-
-    def indent(s: String): String = {
-        val indentation = " " * 4
-        s.split('\n').map(line => if (line.trim.length > 0) indentation + line else line).mkString("\n")
-    }
-
-    def clearIfOnlyWhitespace(s: String): String = {
-        if (s.trim.length > 0) {
-            s
-        } else {
-            ""
-        }
-    }
 
     def typeNameOfField(f: FieldDef): String = {
         if (f.isList) {
@@ -115,19 +82,38 @@ class Generator(val packageName: Option[String] = None) {
 
 case class GeneratorResult(fileName: String, contents: String)
 
+trait SourceCodeItem {
+
+    def lines(): List[String]
+
+}
+
 case class PackageDeclaration(name: String) {
     override def toString: String = s"package $name;\n\n"
 }
 
-case class Interface(name: String, _extends: List[String], accessors: List[AbstractAccessorPair]) {
+case class Interface(name: String, _extends: List[String], members: List[SourceCodeItem]) extends SourceCodeItem {
 
-    override def toString: String = {
-        s"""public interface $name$extendsDeclaration {
-           #$fields}
-           #""".stripMargin('#')
+    override def lines(): List[String] = {
+        List(
+            s"public interface $name$extendsDeclaration {"
+        ) ++
+            bodyLines().map(indent) ++
+        List(
+            "}",
+            ""
+        )
     }
 
-    def extendsDeclaration: String = {
+    private def bodyLines(): List[String] = {
+        if (members.nonEmpty) {
+            "" :: members.flatMap(a => a.lines() :+ "")
+        } else {
+            Nil
+        }
+    }
+
+    private def extendsDeclaration: String = {
         if (_extends.nonEmpty) {
             s" extends ${_extends.mkString(", ")}"
         } else {
@@ -135,41 +121,27 @@ case class Interface(name: String, _extends: List[String], accessors: List[Abstr
         }
     }
 
-    def fields: String = {
-        clearIfOnlyWhitespace(
-            "\n" +
-            indent(accessors.mkString("\n\n")) +
-            "\n\n"
-        )
-    }
-
-    def indent(s: String): String = {
+    private def indent(s: String): String = {
         val indentation = " " * 4
         s.split('\n').map(line => if (line.trim.length > 0) indentation + line else line).mkString("\n")
     }
 
-    def clearIfOnlyWhitespace(s: String): String = {
-        if (s.trim.length > 0) {
-            s
-        } else {
-            ""
-        }
+}
+
+case class AbstractAccessorPair(name: String, _type: String) extends SourceCodeItem {
+    override def lines(): List[String] = {
+        AbstractGetter(name, _type).lines() ++ AbstractSetter(name, _type).lines()
     }
 }
 
-case class AbstractAccessorPair(name: String, _type: String) {
-    override def toString: String = {
-        List(
-            AbstractGetter(name, _type),
-            AbstractSetter(name, _type)
-        ).mkString("\n")
+case class AbstractGetter(name: String, _type: String) extends SourceCodeItem {
+    override def lines(): List[String] = {
+        List(s"${_type} get${name.capitalize}();")
     }
 }
 
-case class AbstractGetter(name: String, _type: String) {
-    override def toString: String = s"${_type} get${name.capitalize}();"
-}
-
-case class AbstractSetter(name: String, _type: String) {
-    override def toString: String = s"void set${name.capitalize}(${_type} value);"
+case class AbstractSetter(name: String, _type: String) extends SourceCodeItem {
+    override def lines(): List[String] = {
+        List(s"void set${name.capitalize}(${_type} value);")
+    }
 }
