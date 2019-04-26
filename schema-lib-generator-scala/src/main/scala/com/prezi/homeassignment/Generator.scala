@@ -62,9 +62,10 @@ class Generator(val packageName: Option[String] = None) {
             _extends = typeDef.inheritsFrom.map(t => t.toString),
             members = typeDef.fields.map(f => AbstractAccessorPair(f.name.toString, typeNameOfField(f)))
         )
+        val javaFile = JavaFile(name + ".java", packageName, interface)
         GeneratorResult(
-            name + ".java",
-            packageDeclaration + interface.lines().mkString("\n")
+            javaFile.name,
+            javaFile.lines().mkString("\n")
         )
     }
 
@@ -88,8 +89,16 @@ trait SourceCodeItem {
 
 }
 
-case class PackageDeclaration(name: String) {
+case class JavaFile(name: String, packageName: Option[String], content: SourceCodeItem) extends SourceCodeItem {
+    override def lines(): List[String] = {
+        packageName.fold(Nil: List[String]) { PackageDeclaration(_).lines() } ++ content.lines()
+    }
+}
+
+case class PackageDeclaration(name: String) extends SourceCodeItem {
     override def toString: String = s"package $name;\n\n"
+
+    override def lines(): List[String] = List(s"package $name;", "")
 }
 
 case class Interface(name: String, _extends: List[String], members: List[SourceCodeItem]) extends SourceCodeItem {
